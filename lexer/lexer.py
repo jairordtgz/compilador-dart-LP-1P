@@ -46,13 +46,28 @@ tokens = (
     'MENOS_IGUAL', 
     'PRODUCTO_IGUAL', 
     'DIVISION_IGUAL',
+    'LLAVE_IZQ',
+    'LLAVE_DER',
+    'PAREN_IZQ',
+    'PAREN_DER',
+    'CORCHETE_IZQ',
+    'CORCHETE_DER',
+    'PUNTO_COMA',
+    'COMA',
+    'PUNTO',
+    'DOS_PUNTOS',
+    'MODULO',
+    'COMENTARIO_BLOQUE',
+    'COMENTARIO_LINEA'
 
 ) + tuple(reserved.values())
 
+#<Carlos Lopez>
 def t_IDENTIFICADOR(t):
     r'[a-zA-Z_][a-zA-Z0-9_]*'
     t.type = reserved.get(t.value, 'IDENTIFICADOR')
     return t
+#</Carlos Lopez>
 
 #INICIO APORTE JAIRO RODRIGUEZ 
 
@@ -84,6 +99,31 @@ t_PRODUCTO_IGUAL = r'\*='
 t_DIVISION_IGUAL = r'/='
 t_ASIGNACION     = r'='
 #FIN APORTE JAIRO RODRIGUEZ
+
+#INICIO APORTE CARLOS LÓPEZ
+
+t_LLAVE_IZQ      = r'\{'
+t_LLAVE_DER      = r'\}'
+t_PAREN_IZQ      = r'\('
+t_PAREN_DER      = r'\)'
+t_CORCHETE_IZQ   = r'\['
+t_CORCHETE_DER   = r'\]'
+t_PUNTO_COMA     = r';'
+t_COMA           = r','
+t_PUNTO          = r'\.'
+t_DOS_PUNTOS     = r':'
+t_MODULO         = r'%'
+
+def t_COMENTARIO_BLOQUE(t):
+    r'/\*(.|\n)*?\*/'
+    t.lexer.lineno += t.value.count('\n')
+    return t
+
+def t_COMENTARIO_LINEA(t):
+    r'//[^\n]*'
+    return t
+
+#FIN APORTE CARLOS LÓPEZ
 
 def t_newline(t):
     r'\n+'

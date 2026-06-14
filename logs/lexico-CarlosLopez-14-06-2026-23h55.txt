@@ -1,0 +1,108 @@
+================================================================
+  ANÁLISIS LÉXICO — Dart Analyzer
+  Desarrollador : CarlosLopez
+  Algoritmo     : algoritmo_carlos.dart
+  Fecha/Hora    : 14/06/2026 23:55:12
+================================================================
+
+TOKENS RECONOCIDOS (93):
+Línea   Tipo                    Valor
+----------------------------------------------------------------
+1       COMENTARIO_LINEA        // algoritmo_carlos.dart
+3       COMENTARIO_BLOQUE       /* Verificar si un número es par o impar */
+4       VOID                    void
+4       IDENTIFICADOR           verificar
+4       PAREN_IZQ               (
+4       INT                     int
+4       IDENTIFICADOR           numero
+4       PAREN_DER               )
+4       LLAVE_IZQ               {
+5       BOOL                    bool
+5       IDENTIFICADOR           esPar
+5       ASIGNACION              =
+5       FALSE                   false
+5       PUNTO_COMA              ;
+7       COMENTARIO_LINEA        //Resultado de la verificación
+8       INT                     int
+8       IDENTIFICADOR           resultado
+8       ASIGNACION              =
+8       IDENTIFICADOR           numero
+8       MODULO                  %
+8       ENTERO                  2
+8       PUNTO_COMA              ;
+10      IF                      if
+10      PAREN_IZQ               (
+10      IDENTIFICADOR           resultado
+10      IGUAL_IGUAL             ==
+10      ENTERO                  0
+10      PAREN_DER               )
+10      LLAVE_IZQ               {
+11      IDENTIFICADOR           esPar
+11      ASIGNACION              =
+11      TRUE                    true
+11      PUNTO_COMA              ;
+12      LLAVE_DER               }
+14      COMENTARIO_BLOQUE       /* Impresion del resultado
+    de la operación*/
+17      IF                      if
+17      PAREN_IZQ               (
+17      IDENTIFICADOR           esPar
+17      PAREN_DER               )
+17      LLAVE_IZQ               {
+18      PRINT                   print
+18      PAREN_IZQ               (
+18      CADENA                  Es par.
+18      PAREN_DER               )
+18      PUNTO_COMA              ;
+19      LLAVE_DER               }
+19      ELSE                    else
+19      LLAVE_IZQ               {
+20      PRINT                   print
+20      PAREN_IZQ               (
+20      CADENA                  Es impar.
+20      PAREN_DER               )
+20      PUNTO_COMA              ;
+21      LLAVE_DER               }
+23      LLAVE_DER               }
+25      VOID                    void
+25      IDENTIFICADOR           main
+25      PAREN_IZQ               (
+25      PAREN_DER               )
+25      LLAVE_IZQ               {
+26      COMENTARIO_LINEA        //Lista de numeros
+27      LIST_TYPE               List
+27      MENOR                   <
+27      INT                     int
+27      MAYOR                   >
+27      IDENTIFICADOR           numeros
+27      ASIGNACION              =
+27      CORCHETE_IZQ            [
+27      ENTERO                  1
+27      COMA                    ,
+27      ENTERO                  2
+27      COMA                    ,
+27      ENTERO                  3
+27      COMA                    ,
+27      ENTERO                  4
+27      CORCHETE_DER            ]
+27      PUNTO_COMA              ;
+29      COMENTARIO_LINEA        //Verificando todos los numeros de la lista
+30      FOR                     for
+30      PAREN_IZQ               (
+30      VAR                     var
+30      IDENTIFICADOR           numero
+30      IN                      in
+30      IDENTIFICADOR           numeros
+30      PAREN_DER               )
+30      LLAVE_IZQ               {
+31      IDENTIFICADOR           verificar
+31      PAREN_IZQ               (
+31      IDENTIFICADOR           numero
+31      PAREN_DER               )
+31      PUNTO_COMA              ;
+32      LLAVE_DER               }
+33      LLAVE_DER               }
+
+ERRORES: Ninguno
+
+================================================================
