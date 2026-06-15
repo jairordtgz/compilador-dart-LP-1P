@@ -57,6 +57,14 @@ tokens = (
     'PUNTO',
     'DOS_PUNTOS',
     'MODULO',
+    'MAS',
+    'MENOS',
+    'PRODUCTO',
+    'DIVISION',
+    'DIVISION_ENTERA',
+    'AND',
+    'OR',
+    'NOT',
     'COMENTARIO_BLOQUE',
     'COMENTARIO_LINEA'
 
@@ -125,6 +133,19 @@ def t_COMENTARIO_LINEA(t):
 
 #FIN APORTE CARLOS LÓPEZ
 
+#Inicio de Aporte Benjamin Cedeño
+
+t_MAS = r'\+'
+t_MENOS = r'-'
+t_PRODUCTO = r'\*'
+t_DIVISION = r'/'
+t_DIVISION_ENTERA = r'~/'
+
+t_AND = r'&&'
+t_OR = r'\|\|'
+t_NOT = r'!'
+t_ignore = ' \t\r'
+
 def t_newline(t):
     r'\n+'
     t.lexer.lineno += len(t.value)
@@ -138,7 +159,7 @@ def t_error(t):
     t.lexer.errores.append(msg)
     t.lexer.skip(1)
 
-t_ignore = ' \t\r'
+
 
 # ============================================================
 # LOG Y FUNCIÓN PRINCIPAL
@@ -205,3 +226,5 @@ def analizar(codigo, desarrollador, algoritmo):
     print(f'Total errores : {len(lexer.errores)}')
     generar_log(tokens_encontrados, lexer.errores, desarrollador, algoritmo)
     return tokens_encontrados, lexer.errores
+
+#Fin de Aporte Benjamin Cedeño
