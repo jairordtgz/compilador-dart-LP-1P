@@ -1,27 +1,26 @@
-// Prueba de operadores logicos y matematicos - Benjamin Cedeño
+import "mi_lib";
 
 int suma = 10 + 5;
 int resta = 10 - 5;
-int multiplicacion = 10 * 5;
 double division = 10 / 5;
-int division_entera = 10 ~/ 3;
-int modulo = 10 % 3;
 
-bool and_logico = true && false;
-bool or_logico = true || false;
-bool not_logico = !true;
+// Set y método sobre set
+Set<String> conjunto = {"dart", "python"};
+conjunto.add("rust");
 
-// Estructuras asignadas para las siguientes fases
-Set<String> lenguajes = {'dart', 'python'};
+// Lista
+List<int> numeros = [1, 2, 3];
 
-int contador = 0;
-while(contador < 5) {
-    if (contador == 3) {
-        break;
-    } else {
-        contador = contador + 1;
-    }
+// Map y asignación por clave
+Map<String, int> mapa = {"uno": 1};
+mapa["uno"] = 2;
+
+// Función con parámetro opcional (por defecto)
+void opcion([int x = 5]) {
+    int tmp = x;
 }
 
-// Error lexico intencional para probar la funcion t_error
-@ variable_invalida = 100;
+// Función int con return
+int sumar(int a, int b) { return a + b; }
+
+int resultado = sumar(2, 3);

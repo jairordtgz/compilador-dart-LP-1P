@@ -1,0 +1,7 @@
+============================================================
+ANALISIS SINTACTICO DART
+Usuario: ibcg04
+Fecha: 21/06/2026 20:26:24
+============================================================
+
+Analisis completado sin errores sintacticos

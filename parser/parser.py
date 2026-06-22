@@ -297,7 +297,95 @@ def generar_log_sintactico(usuario):
             )
 
     print(f"\nLog sintactico generado: {ruta}")
-    
+
+
+# fin aporte jairo  
+
+
+# INICIO APORTE — Benjamin Cedeño
+
+
+def p_declarar_set(p):
+    '''
+    sentencia : SET_TYPE MENOR STRING_TYPE MAYOR IDENTIFICADOR ASIGNACION conjunto PUNTO_COMA
+              | SET_TYPE MENOR INT MAYOR IDENTIFICADOR ASIGNACION conjunto PUNTO_COMA
+    '''
+
+def p_conjunto(p):
+    '''
+    conjunto : LLAVE_IZQ elementos_conjunto LLAVE_DER
+             | LLAVE_IZQ LLAVE_DER
+    '''
+
+def p_elementos_conjunto(p):
+    '''
+    elementos_conjunto : elementos_conjunto COMA valor
+                       | valor
+    '''
+
+def p_metodo_set(p):
+    '''
+    sentencia : IDENTIFICADOR PUNTO IDENTIFICADOR PAREN_IZQ valor PAREN_DER PUNTO_COMA
+    '''
+
+def p_llamada_metodo_expresion(p):
+    '''
+    expresion : IDENTIFICADOR PUNTO IDENTIFICADOR PAREN_IZQ valor PAREN_DER
+    '''
+
+def p_condicion_expresion(p):
+    '''
+    condicion : expresion
+    '''
+
+# --- Estructura de control: for clásico y for-in ---
+
+def p_incremento(p):
+    '''
+    incremento : IDENTIFICADOR MAS_IGUAL valor
+               | IDENTIFICADOR ASIGNACION expresion
+    '''
+
+def p_for(p):
+    '''
+    sentencia : FOR PAREN_IZQ sentencia condicion PUNTO_COMA incremento PAREN_DER LLAVE_IZQ sentencias LLAVE_DER
+    '''
+
+def p_for_in(p):
+    '''
+    sentencia : FOR PAREN_IZQ VAR IDENTIFICADOR IN IDENTIFICADOR PAREN_DER LLAVE_IZQ sentencias LLAVE_DER
+    '''
+
+# --- Tipo de función: parámetro opcional con valor por defecto ---
+
+def p_parametro_opcional(p):
+    '''
+    parametro_opcional : INT IDENTIFICADOR ASIGNACION ENTERO
+                       | DOUBLE IDENTIFICADOR ASIGNACION FLOTANTE
+                       | STRING_TYPE IDENTIFICADOR ASIGNACION CADENA
+    '''
+
+def p_funcion_parametro_opcional(p):
+    '''
+    sentencia : VOID IDENTIFICADOR PAREN_IZQ parametros COMA CORCHETE_IZQ parametro_opcional CORCHETE_DER PAREN_DER LLAVE_IZQ sentencias LLAVE_DER
+              | VOID IDENTIFICADOR PAREN_IZQ CORCHETE_IZQ parametro_opcional CORCHETE_DER PAREN_DER LLAVE_IZQ sentencias LLAVE_DER
+    '''
+
+# --- Reglas generales: import e ingreso de datos por teclado ---
+
+def p_import(p):
+    '''
+    sentencia : IMPORT CADENA PUNTO_COMA
+    '''
+
+def p_leer_teclado(p):
+    '''
+    sentencia : STRING_TYPE INTERROGACION IDENTIFICADOR ASIGNACION IDENTIFICADOR PUNTO IDENTIFICADOR PAREN_IZQ PAREN_DER PUNTO_COMA
+    '''
+
+# FIN APORTE — Benjamin Cedeño
+
+
 parser = yacc.yacc()
 
 def analizar_sintactico(codigo, usuario):
@@ -319,5 +407,5 @@ def analizar_sintactico(codigo, usuario):
     parser.parse(codigo, lexer=lexer_instance)
 
     generar_log_sintactico(usuario)
-    
-# fin aporte jairo  
+
+

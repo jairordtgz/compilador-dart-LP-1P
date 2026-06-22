@@ -65,6 +65,7 @@ tokens = (
     'AND',
     'OR',
     'NOT',
+    'INTERROGACION',
     'COMENTARIO_BLOQUE',
     'COMENTARIO_LINEA'
 
@@ -145,6 +146,8 @@ t_AND = r'&&'
 t_OR = r'\|\|'
 t_NOT = r'!'
 t_ignore = ' \t\r'
+
+t_INTERROGACION = r'\?'
 
 def t_newline(t):
     r'\n+'
