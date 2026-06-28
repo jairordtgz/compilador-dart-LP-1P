@@ -40,3 +40,9 @@ int resultado = sumar(10, 5);
 double promedio = calcularPromedio(80.0, 95.0);
 
 String mensaje = "Prueba completada";
+
+int edadInvalida = 'veinticinco';
+
+int calcularMal(int a, int b) {
+  return 3.5;
+}

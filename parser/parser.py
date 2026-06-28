@@ -30,6 +30,19 @@ def p_declarar_variable(p):
               | BOOL IDENTIFICADOR ASIGNACION valor PUNTO_COMA
               | VAR IDENTIFICADOR ASIGNACION valor PUNTO_COMA
     '''
+    tipo_token = p.slice[1].type
+    nombre = p[2]
+    valor  = p[4]
+    linea  = p.lineno(2)
+
+    if tipo_token == 'VAR':
+        tipo_final = valor[0] if valor else 'desconocido'
+    else:
+        tipo_final = TOKEN_A_TIPO[tipo_token]
+        verificar_tipo_asignacion(p, nombre, tipo_final, valor, linea)
+
+    registrar_variable(p, nombre, tipo_final, constante=False,
+                        valor=(valor[1] if valor else None), linea=linea)
     
 def p_declarar_constante(p):
     '''
@@ -43,6 +56,17 @@ def p_declarar_constante(p):
               | CONST BOOL IDENTIFICADOR ASIGNACION valor PUNTO_COMA
     '''
     
+    tipo_token = p.slice[2].type
+    nombre = p[3]
+    valor  = p[5]
+    linea  = p.lineno(3)
+
+    tipo_final = TOKEN_A_TIPO[tipo_token]
+    verificar_tipo_asignacion(p, nombre, tipo_final, valor, linea)
+
+    registrar_variable(p, nombre, tipo_final, constante=True,
+                        valor=(valor[1] if valor else None), linea=linea)
+    
 def p_reasignacion(p):
     '''
     sentencia : IDENTIFICADOR ASIGNACION valor PUNTO_COMA
@@ -51,6 +75,63 @@ def p_reasignacion(p):
               | IDENTIFICADOR PRODUCTO_IGUAL valor PUNTO_COMA
               | IDENTIFICADOR DIVISION_IGUAL valor PUNTO_COMA
     '''
+    nombre = p[1]
+    valor  = p[3]
+    linea  = p.lineno(1)
+
+    tipo_var      = verificar_declarada(p, nombre, linea)             
+    es_constante  = verificar_modificacion_constante(p, nombre, linea) 
+
+    if not es_constante and tipo_var != 'desconocido':                
+        verificar_tipo_asignacion(p, nombre, tipo_var, valor, linea)
+
+#inicio avance 3: Jairo Rodriguez
+TOKEN_A_TIPO = {
+    'INT':         'int',
+    'DOUBLE':      'double',
+    'STRING_TYPE': 'String',
+    'BOOL':        'bool',
+}
+
+def tipos_compatibles(tipo_declarado, tipo_valor):
+    '''Dart permite asignar int a una variable double (ensanchamiento
+       numérico, válido para literales). El resto exige tipo exacto.'''
+    if tipo_declarado == tipo_valor:
+        return True
+    if tipo_declarado == 'double' and tipo_valor == 'int':
+        return True
+    return False
+
+#regla semantica 3
+def verificar_tipo_asignacion(p, nombre, tipo_declarado, valor, linea):
+    if valor is None:
+        return None
+    tipo_valor, dato = valor
+    if tipo_valor == 'desconocido':
+        return dato  
+    if not tipos_compatibles(tipo_declarado, tipo_valor):
+        errores_semanticos.append(
+            f"Error semántico [Tipo, Línea {linea}]: "
+            f"No se puede asignar un valor de tipo '{tipo_valor}' "
+            f"a la variable '{nombre}' de tipo '{tipo_declarado}'."
+        )
+    return dato
+
+#regla semantica 4
+def verificar_tipo_retorno(p, nombre_funcion, tipo_esperado, valor_retorno, linea):
+    if valor_retorno is None:
+        return
+    tipo_valor, _ = valor_retorno
+    if tipo_valor == 'desconocido':
+        return
+    if not tipos_compatibles(tipo_esperado, tipo_valor):
+        errores_semanticos.append(
+            f"Error semántico [Retorno, Línea {linea}]: "
+            f"La función '{nombre_funcion}' debe retornar un valor de tipo "
+            f"'{tipo_esperado}', pero se encontró '{tipo_valor}'."
+        )
+
+#fin avance 3 Jairo Rodriguez
 
 def p_valor(p):
     '''
@@ -60,11 +141,24 @@ def p_valor(p):
           | TRUE
           | FALSE
     '''
+    tipo_token = p.slice[1].type
+    if tipo_token == 'expresion':
+        p[0] = p[1]
+    elif tipo_token == 'condicion':
+        p[0] = ('bool', None)
+    elif tipo_token == 'CADENA':
+        p[0] = ('String', p[1])
+    elif tipo_token == 'TRUE':
+        p[0] = ('bool', True)
+    elif tipo_token == 'FALSE':
+        p[0] = ('bool', False)
     
 def p_expresion_parentesis(p):
     '''
     expresion : PAREN_IZQ expresion PAREN_DER
     '''
+    #avance semantico Jairo Rodriguez
+    p[0] = p[2]
     
 def p_operacion_matematica(p):
     '''
@@ -73,6 +167,17 @@ def p_operacion_matematica(p):
               | expresion PRODUCTO expresion
               | expresion DIVISION expresion
     '''
+    p[0] = (verificar_operacion(p, p[2], p[1], p[3]), None)
+    
+def verificar_operacion(p, operador, izquierda, derecha):
+    if izquierda is None or derecha is None:
+        return 'desconocido'
+    tipo_izq, _ = izquierda
+    tipo_der, _ = derecha
+    numericos = ('int', 'double')
+    if tipo_izq in numericos and tipo_der in numericos:
+        return 'double' if (tipo_izq == 'double' or tipo_der == 'double') else 'int'
+    return 'desconocido'
 
 def p_expresion_valor(p):
     '''
@@ -80,7 +185,17 @@ def p_expresion_valor(p):
               | FLOTANTE
               | IDENTIFICADOR
     '''
-
+    tipo_token = p.slice[1].type
+    if tipo_token == 'ENTERO':
+        p[0] = ('int', p[1])
+    elif tipo_token == 'FLOTANTE':
+        p[0] = ('double', p[1])
+    else:
+        nombre = p[1]
+        linea  = p.lineno(1)
+        tipo_var = verificar_declarada(p, nombre, linea)
+        p[0] = (tipo_var, nombre)
+    
 def p_condicion_relacional(p):
     '''
     condicion : expresion MAYOR expresion
@@ -126,12 +241,20 @@ def p_funcion_int(p):
     sentencia : INT IDENTIFICADOR PAREN_IZQ parametros PAREN_DER LLAVE_IZQ RETURN expresion PUNTO_COMA LLAVE_DER
               | INT IDENTIFICADOR PAREN_IZQ PAREN_DER LLAVE_IZQ RETURN expresion PUNTO_COMA LLAVE_DER
     '''
+    
+    nombre_funcion = p[2]
+    expresion_retorno = p[8] if len(p) == 11 else p[7]
+    verificar_tipo_retorno(p, nombre_funcion, 'int', expresion_retorno, p.lineno(1))
 
 def p_funcion_double(p):
     '''
     sentencia : DOUBLE IDENTIFICADOR PAREN_IZQ parametros PAREN_DER LLAVE_IZQ RETURN expresion PUNTO_COMA LLAVE_DER
               | DOUBLE IDENTIFICADOR PAREN_IZQ PAREN_DER LLAVE_IZQ RETURN expresion PUNTO_COMA LLAVE_DER
     '''
+    
+    nombre_funcion = p[2]
+    expresion_retorno = p[8] if len(p) == 11 else p[7]
+    verificar_tipo_retorno(p, nombre_funcion, 'double', expresion_retorno, p.lineno(1))
     
 def p_parametros(p):
     '''
@@ -145,6 +268,12 @@ def p_parametro(p):
               | DOUBLE IDENTIFICADOR
               | STRING_TYPE IDENTIFICADOR
     '''
+    tipo_token = p.slice[1].type
+    nombre = p[2]
+    tipo   = TOKEN_A_TIPO[tipo_token]
+    registrar_variable(p, nombre, tipo, constante=False,
+                        valor=None, linea=p.lineno(2))
+    p[0] = (tipo, nombre)
 
 def p_llamada_funcion(p):
     '''
