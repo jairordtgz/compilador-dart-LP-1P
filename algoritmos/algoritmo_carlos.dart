@@ -31,17 +31,14 @@ void main() {
     };
 
     // Solicitudes recibidas en orden de llegada
-    List<String> solicitudes = ['Ana', 'Pedro', 'Ana', 'Luis'];
+    List<String> solicitudes = ['Ana', 'Pedro', 'Ana', 'Luis', 'Maria'];
 
     for (var nombre in solicitudes) {
-
         if (!inscritos.contains(nombre) && aceptados < MAX_CUPOS) {
             inscritos.add(nombre);
             aceptados += 1;
-
         } else if (inscritos.contains(nombre)) {
             duplicados += 1;
-
         } else {
             rechazados += 1;
         }
@@ -54,8 +51,14 @@ void main() {
     int cupoRestante = calcularCupoDisponible(MAX_CUPOS, aceptados);
     int totalProcesados = aceptados + rechazados + duplicados;
 
+    int verificados = 0;
+    for (int i = 0; i < aceptados; i += 1) {
+        verificados += 1;
+    }
+
     print(cupoRestante);
     print(totalProcesados);
+    print(verificados);
 
     mostrarMensaje('Proceso de inscripcion finalizado');
 }

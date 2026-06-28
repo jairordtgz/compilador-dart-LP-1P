@@ -215,8 +215,10 @@ def p_if_elseif(p):
 
 def p_while(p):
     '''
-    sentencia : WHILE PAREN_IZQ condicion PAREN_DER LLAVE_IZQ sentencias LLAVE_DER
+    sentencia : WHILE PAREN_IZQ condicion PAREN_DER LLAVE_IZQ marca_bucle sentencias LLAVE_DER
     '''
+    global profundidad_bucle
+    profundidad_bucle -= 1
 
 # --- Tipo de función: void ---
 
@@ -236,6 +238,50 @@ def p_llamada_funcion_sentencia(p):
     sentencia : IDENTIFICADOR PAREN_IZQ argumentos PAREN_DER PUNTO_COMA
               | IDENTIFICADOR PAREN_IZQ PAREN_DER PUNTO_COMA
     '''
+
+# Globals para analisis semantico
+errores_semanticos = []
+tabla_simbolos     = {}   # nombre -> {tipo, constante, valor, linea}
+profundidad_bucle  = 0    # contador de bucles anidados (usado también por R6)
+
+# Producción vacía: se reduce al entrar al cuerpo de un bucle,
+# incrementando el contador antes de procesar las sentencias internas.
+def p_marca_inicio_bucle(p):
+    '''
+    marca_bucle :
+    '''
+    global profundidad_bucle
+    profundidad_bucle += 1
+
+def registrar_variable(p, nombre, tipo, constante, valor, linea):
+    tabla_simbolos[nombre] = {
+        'tipo':      tipo,
+        'constante': constante,
+        'valor':     valor,
+        'linea':     linea
+    }
+
+def verificar_declarada(p, nombre, linea):
+    '''R1: la variable debe existir en tabla_simbolos antes de usarse.'''
+    if nombre not in tabla_simbolos:
+        errores_semanticos.append(
+            f"Error semántico [Identificador, Línea {linea}]: "
+            f"La variable '{nombre}' no ha sido declarada en el alcance actual."
+        )
+        return 'desconocido'
+    return tabla_simbolos[nombre]['tipo']
+
+def verificar_modificacion_constante(p, nombre, linea):
+    '''R2: una variable final/const no puede reasignarse después de su declaración.'''
+    if nombre in tabla_simbolos and tabla_simbolos[nombre]['constante']:
+        errores_semanticos.append(
+            f"Error semántico [Tipo, Línea {linea}]: "
+            f"La constante '{nombre}' no puede ser modificada."
+        )
+        return True
+    return False
+
+# fin aporte carlos
 
 errores_sintacticos = []
 
@@ -408,4 +454,54 @@ def analizar_sintactico(codigo, usuario):
 
     generar_log_sintactico(usuario)
 
+
+#inicio aporte carlos
+
+def generar_log_semantico(usuario):
+
+    ahora      = datetime.now()
+    nombre_log = f"semantico-{usuario}-{ahora.strftime('%d-%m-%Y-%Hh%M')}.txt"
+
+    carpeta = os.path.join(os.path.dirname(__file__), '..', 'logs')
+    os.makedirs(carpeta, exist_ok=True)
+    ruta = os.path.join(carpeta, nombre_log)
+
+    with open(ruta, "w", encoding="utf-8") as archivo:
+        archivo.write("=" * 60 + "\n")
+        archivo.write("ANALISIS SEMANTICO DART\n")
+        archivo.write(f"Usuario: {usuario}\n")
+        archivo.write(f"Fecha: {ahora.strftime('%d/%m/%Y %H:%M:%S')}\n")
+        archivo.write("=" * 60 + "\n\n")
+
+        if errores_semanticos:
+            archivo.write("ERRORES SEMANTICOS\n")
+            archivo.write("-" * 60 + "\n")
+            for error in errores_semanticos:
+                archivo.write(error + "\n")
+        else:
+            archivo.write("Analisis completado sin errores semanticos\n")
+
+    print(f"\nLog semantico generado: {ruta}")
+
+
+def analizar_semantico(codigo, usuario):
+    global profundidad_bucle
+    errores_semanticos.clear()
+    tabla_simbolos.clear()
+    profundidad_bucle = 0
+
+    lexer_instance = lex.lex(module=lexer_module)
+    token_original = lexer_instance.token
+
+    def token_sin_comentarios():
+        tok = token_original()
+        while tok and tok.type in ('COMENTARIO_LINEA', 'COMENTARIO_BLOQUE'):
+            tok = token_original()
+        return tok
+
+    lexer_instance.token = token_sin_comentarios
+    parser.parse(codigo, lexer=lexer_instance)
+    generar_log_semantico(usuario)
+
+# fin aporte carlos
 
