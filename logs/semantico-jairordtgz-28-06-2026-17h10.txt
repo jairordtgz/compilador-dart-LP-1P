@@ -1,0 +1,10 @@
+============================================================
+ANALISIS SEMANTICO DART
+Usuario: jairordtgz
+Fecha: 28/06/2026 17:10:38
+============================================================
+
+ERRORES SEMANTICOS
+------------------------------------------------------------
+Error semántico [Tipo, Línea 44]: No se puede asignar un valor de tipo 'String' a la variable 'edadInvalida' de tipo 'int'.
+Error semántico [Retorno, Línea 46]: La función 'calcularMal' debe retornar un valor de tipo 'int', pero se encontró 'double'.

@@ -85,7 +85,7 @@ def p_reasignacion(p):
     if not es_constante and tipo_var != 'desconocido':                
         verificar_tipo_asignacion(p, nombre, tipo_var, valor, linea)
 
-#inicio avance 3: Jairo Rodriguez
+#inicio avance 3 (semantico): Jairo Rodriguez
 TOKEN_A_TIPO = {
     'INT':         'int',
     'DOUBLE':      'double',
@@ -131,7 +131,7 @@ def verificar_tipo_retorno(p, nombre_funcion, tipo_esperado, valor_retorno, line
             f"'{tipo_esperado}', pero se encontró '{tipo_valor}'."
         )
 
-#fin avance 3 Jairo Rodriguez
+#fin avance 3 semantico Jairo Rodriguez
 
 def p_valor(p):
     '''
@@ -157,7 +157,6 @@ def p_expresion_parentesis(p):
     '''
     expresion : PAREN_IZQ expresion PAREN_DER
     '''
-    #avance semantico Jairo Rodriguez
     p[0] = p[2]
     
 def p_operacion_matematica(p):
@@ -169,15 +168,6 @@ def p_operacion_matematica(p):
     '''
     p[0] = (verificar_operacion(p, p[2], p[1], p[3]), None)
     
-def verificar_operacion(p, operador, izquierda, derecha):
-    if izquierda is None or derecha is None:
-        return 'desconocido'
-    tipo_izq, _ = izquierda
-    tipo_der, _ = derecha
-    numericos = ('int', 'double')
-    if tipo_izq in numericos and tipo_der in numericos:
-        return 'double' if (tipo_izq == 'double' or tipo_der == 'double') else 'int'
-    return 'desconocido'
 
 def p_expresion_valor(p):
     '''
@@ -521,16 +511,6 @@ def p_incremento(p):
                | IDENTIFICADOR ASIGNACION expresion
     '''
 
-def p_for(p):
-    '''
-    sentencia : FOR PAREN_IZQ sentencia condicion PUNTO_COMA incremento PAREN_DER LLAVE_IZQ sentencias LLAVE_DER
-    '''
-
-def p_for_in(p):
-    '''
-    sentencia : FOR PAREN_IZQ VAR IDENTIFICADOR IN IDENTIFICADOR PAREN_DER LLAVE_IZQ sentencias LLAVE_DER
-    '''
-
 # --- Tipo de función: parámetro opcional con valor por defecto ---
 
 def p_parametro_opcional(p):
@@ -636,18 +616,6 @@ def analizar_semantico(codigo, usuario):
 
 
 # INICIO APORTE Benjamin Cedeño (Semántico)
-errores_semanticos = []
-profundidad_bucle = 0   # cuenta cuántos bucles anidados nos rodean
-
-# --- Marca de entrada a un bucle ---
-# Producción vacía: se reduce justo cuando yacc "entra" al
-# cuerpo del bucle, antes de procesar las sentencias internas.
-def p_marca_inicio_bucle(p):
-    '''
-    marca_bucle :
-    '''
-    global profundidad_bucle
-    profundidad_bucle += 1
 
 # --- For clásico con marca de bucle ---
 def p_for(p):
@@ -701,53 +669,4 @@ def verificar_operacion(p, operador, izquierda, derecha):
             f"El operador '{operador}' no es compatible entre "
             f"tipos '{tipo_izq}' y '{tipo_der}'."
         )
-    return 'error'
-
-# --- Log semántico ---
-def generar_log_semantico(usuario):
-    ahora = datetime.now()
-    nombre_log = f"semantico-{usuario}-{ahora.strftime('%d-%m-%Y-%Hh%M')}.txt"
-
-    carpeta = os.path.join(os.path.dirname(__file__), '..', 'logs')
-    os.makedirs(carpeta, exist_ok=True)
-    ruta = os.path.join(carpeta, nombre_log)
-
-    with open(ruta, "w", encoding="utf-8") as archivo:
-        archivo.write("=" * 60 + "\n")
-        archivo.write("ANALISIS SEMANTICO DART\n")
-        archivo.write(f"Usuario: {usuario}\n")
-        archivo.write(f"Fecha: {ahora.strftime('%d/%m/%Y %H:%M:%S')}\n")
-        archivo.write("=" * 60 + "\n\n")
-
-        if errores_semanticos:
-            archivo.write("ERRORES SEMANTICOS\n")
-            archivo.write("-" * 60 + "\n")
-            for error in errores_semanticos:
-                archivo.write(error + "\n")
-        else:
-            archivo.write("Analisis completado sin errores semanticos\n")
-
-    print(f"\nLog semantico generado: {ruta}")
-
-def analizar_semantico(codigo, usuario):
-    global profundidad_bucle
-    errores_semanticos.clear()
-    profundidad_bucle = 0
-
-    lexer_instance = lex.lex(module=lexer_module)
-    token_original = lexer_instance.token
-
-    def token_sin_comentarios():
-        tok = token_original()
-        while tok and tok.type in ('COMENTARIO_LINEA', 'COMENTARIO_BLOQUE'):
-            tok = token_original()
-        return tok
-
-    lexer_instance.token = token_sin_comentarios
-    parser.parse(codigo, lexer=lexer_instance)
-    generar_log_semantico(usuario)
-
-
-# FIN APORTE Benjamin Cedeño (Semántico)
-
-
+    return 'desconocido'
