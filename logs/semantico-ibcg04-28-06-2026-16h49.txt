@@ -1,0 +1,10 @@
+============================================================
+ANALISIS SEMANTICO DART
+Usuario: ibcg04
+Fecha: 28/06/2026 16:49:17
+============================================================
+
+ERRORES SEMANTICOS
+------------------------------------------------------------
+Error semantico [Operacion, Linea 10]: El operador '+' no es compatible entre tipos 'String' y 'int'.
+Error semantico [Control, Linea 28]: 'break' solo puede usarse dentro de un bucle.
