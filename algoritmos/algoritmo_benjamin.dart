@@ -1,26 +1,32 @@
 import "mi_lib";
 
-int suma = 10 + 5;
-int resta = 10 - 5;
-double division = 10 / 5;
+int numero = 10;
+double decimal = 2.5;
+String texto = "dart";
 
-// Set y método sobre set
-Set<String> conjunto = {"dart", "python"};
-conjunto.add("rust");
+int suma = numero + 5;
+double mezclaNumerica = numero + decimal;
 
-// Lista
-List<int> numeros = [1, 2, 3];
+// Error de prueba comentado:
+// Operacion incompatible entre String e int.
+// var operacionIncompatible = texto + numero;
 
-// Map y asignación por clave
-Map<String, int> mapa = {"uno": 1};
-mapa["uno"] = 2;
-
-// Función con parámetro opcional (por defecto)
-void opcion([int x = 5]) {
-    int tmp = x;
+int i = 0;
+for (i = 0; i < 3; i += 1) {
+    int dentroFor = i + 1;
+    break;
 }
 
-// Función int con return
-int sumar(int a, int b) { return a + b; }
+List<int> numeros = [1, 2, 3];
+for (var item in numeros) {
+    int recorrido = 1;
+}
 
-int resultado = sumar(2, 3);
+while (numero > 0) {
+    numero -= 1;
+    break;
+}
+
+// Error de prueba comentado:
+// break fuera de un bucle.
+// break;
