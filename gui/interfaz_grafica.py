@@ -1,11 +1,13 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, filedialog
 import sys
 import os
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, PROJECT_ROOT)
 
+import ply.lex as ply_lex
+from lexer import lexer as lexer_module
 from lexer.lexer import analizar as analizar_lexico
 from parser.parser import analizar_sintactico, errores_sintacticos
 from parser.parser import analizar_semantico, errores_semanticos
@@ -17,6 +19,13 @@ COLORES_TOKEN = {
     'LITERAL':             '#1D9E75',
     'OPERADOR':            '#B8860B',
     'IDENTIFICADOR':       '#222222',
+    'COMENTARIO':          '#8A8A8A',
+}
+
+DESARROLLADORES = {
+    'Jairo Rodríguez (jairordtgz)': ('jairordtgz', 'algoritmo_jairo.dart'),
+    'Carlos López (caluloper)':     ('caluloper',  'algoritmo_carlos.dart'),
+    'Benjamin Cedeño (ibcg04)':     ('ibcg04',     'algoritmo_benjamin.dart'),
 }
 
 PALABRAS_RESERVADAS = {
@@ -32,6 +41,7 @@ OPERADORES = {
     'ASIGNACION','MAS_IGUAL','MENOS_IGUAL','PRODUCTO_IGUAL','DIVISION_IGUAL',
     'AND','OR','NOT',
 }
+COMENTARIOS = {'COMENTARIO_LINEA', 'COMENTARIO_BLOQUE'}
 
 
 def clasificar_token(tipo_token):
@@ -43,6 +53,8 @@ def clasificar_token(tipo_token):
         return 'LITERAL'
     if tipo_token in OPERADORES:
         return 'OPERADOR'
+    if tipo_token in COMENTARIOS:
+        return 'COMENTARIO'
     return 'IDENTIFICADOR'
 
 
@@ -51,6 +63,9 @@ class DartAnalyzerApp(tk.Tk):
         super().__init__()
         self.title("Analizador Dart — Léxico, Sintáctico y Semántico (PLY)")
         self.geometry("1150x680")
+
+        self._lexer_editor = ply_lex.lex(module=lexer_module, debug=False)
+        self._ultimos_errores_lexicos = []
 
         self._build_toolbar()
         self._build_panels()
@@ -72,6 +87,20 @@ class DartAnalyzerApp(tk.Tk):
 
         ttk.Button(barra, text="Analizar Semántico",
                    command=self.accion_semantico).pack(side=tk.LEFT, padx=3)
+
+        ttk.Button(barra, text="Analizar todo",
+                   command=self.accion_analizar_todo).pack(side=tk.LEFT, padx=3)
+
+        ttk.Separator(barra, orient=tk.VERTICAL).pack(side=tk.LEFT, fill=tk.Y, padx=8)
+
+        self.dev_var = tk.StringVar(value=list(DESARROLLADORES)[0])
+        ttk.Combobox(barra, textvariable=self.dev_var,
+                     values=list(DESARROLLADORES),
+                     state='readonly', width=26).pack(side=tk.LEFT, padx=(0, 3))
+        ttk.Button(barra, text="Cargar algoritmo",
+                   command=self.accion_cargar_algoritmo).pack(side=tk.LEFT, padx=3)
+        ttk.Button(barra, text="Abrir .dart...",
+                   command=self.accion_cargar_archivo).pack(side=tk.LEFT, padx=3)
 
         ttk.Separator(barra, orient=tk.VERTICAL).pack(side=tk.LEFT, fill=tk.Y, padx=8)
 
@@ -106,12 +135,15 @@ class DartAnalyzerApp(tk.Tk):
                                font=('Consolas', 11))
         self.editor.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
+        for categoria, color in COLORES_TOKEN.items():
+            self.editor.tag_configure(categoria, foreground=color)
+
         scroll_y = ttk.Scrollbar(frame_editor, orient=tk.VERTICAL,
                                   command=self._on_scroll)
         scroll_y.pack(side=tk.RIGHT, fill=tk.Y)
         self.editor.config(yscrollcommand=scroll_y.set)
 
-        self.editor.bind('<KeyRelease>', lambda e: self._actualizar_lineas())
+        self.editor.bind('<KeyRelease>', lambda e: self._on_editor_change())
         self.editor.bind('<MouseWheel>', lambda e: self.after(10, self._actualizar_lineas))
 
         # --- Panel derecho: pestañas de resultados ---
@@ -205,12 +237,42 @@ class DartAnalyzerApp(tk.Tk):
         self.lineas.config(state='disabled')
         self.lineas.yview_moveto(self.editor.yview()[0])
 
+    def _on_editor_change(self):
+        self._actualizar_lineas()
+        self._resaltar_sintaxis()
+
+    def _resaltar_sintaxis(self):
+        codigo = self.editor.get('1.0', 'end-1c')
+
+        for categoria in COLORES_TOKEN:
+            self.editor.tag_remove(categoria, '1.0', tk.END)
+
+        self._lexer_editor.lineno = 1
+        self._lexer_editor.errores = []
+        self._lexer_editor.input(codigo)
+
+        while True:
+            tok = self._lexer_editor.token()
+            if not tok:
+                break
+            inicio = tok.lexpos
+            fin = self._lexer_editor.lexpos
+            categoria = clasificar_token(tok.type)
+            self.editor.tag_add(categoria, f'1.0+{inicio}c', f'1.0+{fin}c')
+
     def _cargar_algoritmo_por_defecto(self):
         ruta = os.path.join(PROJECT_ROOT, 'algoritmos', 'algoritmo_jairo.dart')
         if os.path.exists(ruta):
             with open(ruta, 'r', encoding='utf-8') as f:
                 self.editor.insert('1.0', f.read())
         self._actualizar_lineas()
+        self._resaltar_sintaxis()
+
+    def _cargar_texto(self, contenido):
+        self.editor.delete('1.0', tk.END)
+        self.editor.insert('1.0', contenido)
+        self._actualizar_lineas()
+        self._resaltar_sintaxis()
 
     # ------------------------------------------------------------
     # ACCIONES
@@ -231,6 +293,8 @@ class DartAnalyzerApp(tk.Tk):
             self.texto_errores_lexicos.insert('1.0', '\n'.join(errores))
         else:
             self.texto_errores_lexicos.insert('1.0', 'Sin errores léxicos.')
+
+        self._ultimos_errores_lexicos = errores
 
         self.tabs.select(self.tab_tokens)
         self.status.set(
@@ -281,6 +345,40 @@ class DartAnalyzerApp(tk.Tk):
         self.status.set(
             f"Semántico: {len(errores_semanticos)} error(es). Log guardado en /logs."
         )
+
+    def accion_analizar_todo(self):
+        self.accion_lexico()
+        self.accion_sintactico()
+        self.accion_semantico()
+
+        self.tabs.select(self.tab_errores)
+        self.status.set(
+            f"Análisis completo — Léxico: {len(self._ultimos_errores_lexicos)}, "
+            f"Sintáctico: {len(errores_sintacticos)}, "
+            f"Semántico: {len(errores_semanticos)} error(es). Logs guardados en /logs."
+        )
+
+    def accion_cargar_algoritmo(self):
+        clave = self.dev_var.get()
+        _, archivo = DESARROLLADORES[clave]
+        ruta = os.path.join(PROJECT_ROOT, 'algoritmos', archivo)
+        if not os.path.exists(ruta):
+            messagebox.showerror('Error', f'No se encontró:\n{ruta}')
+            return
+        with open(ruta, 'r', encoding='utf-8') as f:
+            self._cargar_texto(f.read())
+        self.status.set(f'Algoritmo cargado: {archivo}')
+
+    def accion_cargar_archivo(self):
+        ruta = filedialog.askopenfilename(
+            title='Abrir archivo Dart',
+            filetypes=[('Dart', '*.dart'), ('Todos', '*.*')],
+        )
+        if not ruta:
+            return
+        with open(ruta, 'r', encoding='utf-8') as f:
+            self._cargar_texto(f.read())
+        self.status.set(f'Archivo cargado: {os.path.basename(ruta)}')
 
     def accion_limpiar(self):
         self.editor.delete('1.0', tk.END)
