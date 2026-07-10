@@ -110,14 +110,11 @@ class DartAnalyzerApp(tk.Tk):
         ttk.Button(barra, text="Exportar log",
                    command=self.accion_exportar).pack(side=tk.LEFT, padx=3)
 
-    # ------------------------------------------------------------
-    # PANELES (editor izquierda / resultados derecha)
-    # ------------------------------------------------------------
+
     def _build_panels(self):
         contenedor = ttk.Frame(self)
         contenedor.pack(fill=tk.BOTH, expand=True, padx=6, pady=6)
 
-        # --- Panel izquierdo: editor con numeros de linea ---
         panel_izq = ttk.Frame(contenedor)
         panel_izq.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 6))
 
@@ -146,24 +143,21 @@ class DartAnalyzerApp(tk.Tk):
         self.editor.bind('<KeyRelease>', lambda e: self._on_editor_change())
         self.editor.bind('<MouseWheel>', lambda e: self.after(10, self._actualizar_lineas))
 
-        # --- Panel derecho: pestañas de resultados ---
         panel_der = ttk.Frame(contenedor)
         panel_der.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
         self.tabs = ttk.Notebook(panel_der)
         self.tabs.pack(fill=tk.BOTH, expand=True)
 
-        # Pestaña Tokens (Jairo)
+
         self.tab_tokens = ttk.Frame(self.tabs)
         self.tabs.add(self.tab_tokens, text="Tokens")
         self._build_tab_tokens()
 
-        # Pestaña Sintáctico
         self.tab_sintactico = ttk.Frame(self.tabs)
         self.tabs.add(self.tab_sintactico, text="Sintáctico")
         self._build_tab_sintactico()
 
-        # Pestaña Semántico
         self.tab_semantico = ttk.Frame(self.tabs)
         self.tabs.add(self.tab_semantico, text="Semántico")
         ttk.Label(self.tab_semantico, text="Resultado del análisis semántico").pack(
@@ -174,7 +168,6 @@ class DartAnalyzerApp(tk.Tk):
         self.texto_semantico.tag_configure('OK', foreground='#1D9E75')
         self.texto_semantico.tag_configure('ERR', foreground='#B00020')
 
-        # Pestaña Errores (consolidado de los 3 análisis)
         self.tab_errores = ttk.Frame(self.tabs)
         self.tabs.add(self.tab_errores, text="Errores")
         ttk.Label(self.tab_errores, text="Errores semánticos").pack(
@@ -221,9 +214,7 @@ class DartAnalyzerApp(tk.Tk):
         barra = ttk.Label(self, textvariable=self.status, relief=tk.SUNKEN, anchor=tk.W)
         barra.pack(side=tk.BOTTOM, fill=tk.X)
 
-    # ------------------------------------------------------------
-    # Editor: numeros de linea sincronizados
-    # ------------------------------------------------------------
+
     def _on_scroll(self, *args):
         self.editor.yview(*args)
         self.lineas.yview(*args)
@@ -274,9 +265,6 @@ class DartAnalyzerApp(tk.Tk):
         self._actualizar_lineas()
         self._resaltar_sintaxis()
 
-    # ------------------------------------------------------------
-    # ACCIONES
-    # ------------------------------------------------------------
     def accion_lexico(self):
         codigo = self.editor.get('1.0', tk.END)
         tokens_encontrados, errores = analizar_lexico(codigo, 'GUI-jairordtgz', 'editor.dart')
