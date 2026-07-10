@@ -8,8 +8,7 @@ sys.path.insert(0, PROJECT_ROOT)
 
 from lexer.lexer import analizar as analizar_lexico
 from parser.parser import analizar_sintactico, errores_sintacticos
-
-# TODO Benjamin: from parser.parser import analizar_semantico, errores_semanticos
+from parser.parser import analizar_semantico, errores_semanticos
 
 
 COLORES_TOKEN = {
@@ -135,16 +134,24 @@ class DartAnalyzerApp(tk.Tk):
         # Pestaña Semántico — TODO Benjamin
         self.tab_semantico = ttk.Frame(self.tabs)
         self.tabs.add(self.tab_semantico, text="Semántico")
-        ttk.Label(self.tab_semantico,
-                  text="Pendiente: Benjamin conecta parser.analizar_semantico() aquí.",
-                  foreground='gray').pack(padx=10, pady=10)
+        ttk.Label(self.tab_semantico, text="Resultado del análisis semántico").pack(
+            anchor=tk.W, padx=4, pady=(4, 0))
+        self.texto_semantico = tk.Text(self.tab_semantico, wrap='word',
+                                        font=('Consolas', 10))
+        self.texto_semantico.pack(fill=tk.BOTH, expand=True, padx=4, pady=4)
+        self.texto_semantico.tag_configure('OK', foreground='#1D9E75')
+        self.texto_semantico.tag_configure('ERR', foreground='#B00020')
 
         # Pestaña Errores — TODO Benjamin (consolidado de los 3 análisis)
         self.tab_errores = ttk.Frame(self.tabs)
         self.tabs.add(self.tab_errores, text="Errores")
-        ttk.Label(self.tab_errores,
-                  text="Pendiente: Benjamin consolida errores léxicos/sintácticos/semánticos aquí.",
-                  foreground='gray').pack(padx=10, pady=10)
+        ttk.Label(self.tab_errores, text="Errores semánticos").pack(
+            anchor=tk.W, padx=4, pady=(4, 0))
+        self.texto_errores = tk.Text(self.tab_errores, wrap='word',
+                                      font=('Consolas', 10),
+                                      foreground='#B00020',
+                                      background='#FCEBEB')
+        self.texto_errores.pack(fill=tk.BOTH, expand=True, padx=4, pady=4)
 
     def _build_tab_tokens(self):
         columnas = ('linea', 'tipo', 'valor')
@@ -252,9 +259,28 @@ class DartAnalyzerApp(tk.Tk):
         )
 
     def accion_semantico(self):
-        # TODO Benjamin: llamar analizar_semantico(codigo, 'GUI-ibcg04')
-        # y volcar errores_semanticos en self.tab_semantico / self.tab_errores
-        messagebox.showinfo("Pendiente", "Benjamin implementará este análisis.")
+        codigo = self.editor.get('1.0', tk.END)
+        analizar_semantico(codigo, 'GUI-ibcg04')
+
+        self.texto_semantico.delete('1.0', tk.END)
+        self.texto_errores.delete('1.0', tk.END)
+
+        if errores_semanticos:
+            resultado = (
+                f"Errores semánticos ({len(errores_semanticos)}):\n\n"
+                + '\n'.join(errores_semanticos)
+            )
+            self.texto_semantico.insert('1.0', resultado, 'ERR')
+            self.texto_errores.insert('1.0', resultado)
+        else:
+            self.texto_semantico.insert(
+                '1.0', 'Análisis semántico completado sin errores.', 'OK')
+            self.texto_errores.insert('1.0', 'Sin errores semánticos.')
+
+        self.tabs.select(self.tab_semantico)
+        self.status.set(
+            f"Semántico: {len(errores_semanticos)} error(es). Log guardado en /logs."
+        )
 
     def accion_limpiar(self):
         self.editor.delete('1.0', tk.END)
