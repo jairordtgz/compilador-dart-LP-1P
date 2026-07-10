@@ -364,6 +364,50 @@ def p_llamada_funcion_sentencia(p):
               | IDENTIFICADOR PAREN_IZQ PAREN_DER PUNTO_COMA
     '''
 
+# --- Operadores aritméticos adicionales ---
+def p_operacion_modulo(p):
+    '''
+    expresion : expresion MODULO expresion
+    '''
+    p[0] = (verificar_operacion(p, p[2], p[1], p[3]), None)
+
+def p_operacion_division_entera(p):
+    '''
+    expresion : expresion DIVISION_ENTERA expresion
+    '''
+    p[0] = (verificar_operacion(p, p[2], p[1], p[3]), None)
+
+# --- Valor nulo ---
+def p_valor_null(p):
+    '''
+    valor : NULL
+    '''
+    p[0] = ('desconocido', None)
+
+# --- Tipo dynamic ---
+def p_declarar_dynamic(p):
+    '''
+    sentencia : DYNAMIC IDENTIFICADOR ASIGNACION valor PUNTO_COMA
+    '''
+    nombre = p[2]
+    valor  = p[4]
+    linea  = p.lineno(2)
+    registrar_variable(p, nombre, 'desconocido', constante=False,
+                        valor=(valor[1] if valor else None), linea=linea)
+
+# --- Continue ---
+def p_continue(p):
+    '''
+    sentencia : CONTINUE PUNTO_COMA
+    '''
+
+# --- Comentarios (filtrados por el wrapper antes de llegar al parser) ---
+def p_comentario(p):
+    '''
+    sentencia : COMENTARIO_LINEA
+              | COMENTARIO_BLOQUE
+    '''
+
 # Globals para analisis semantico
 errores_semanticos = []
 tabla_simbolos     = {}   # nombre -> {tipo, constante, valor, linea}
@@ -547,8 +591,6 @@ def p_leer_teclado(p):
                         valor=None, linea=p.lineno(3))
 
 # FIN APORTE — Benjamin Cedeño
-
-
 
 
 def analizar_sintactico(codigo, usuario):

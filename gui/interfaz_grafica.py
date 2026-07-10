@@ -7,8 +7,8 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, PROJECT_ROOT)
 
 from lexer.lexer import analizar as analizar_lexico
+from parser.parser import analizar_sintactico, errores_sintacticos
 
-# TODO Carlos: from parser.parser import analizar_sintactico, errores_sintacticos
 # TODO Benjamin: from parser.parser import analizar_semantico, errores_semanticos
 
 
@@ -127,12 +127,10 @@ class DartAnalyzerApp(tk.Tk):
         self.tabs.add(self.tab_tokens, text="Tokens")
         self._build_tab_tokens()
 
-        # Pestaña Árbol Sintáctico — TODO Carlos
+        # Pestaña Sintáctico
         self.tab_sintactico = ttk.Frame(self.tabs)
-        self.tabs.add(self.tab_sintactico, text="Árbol Sintáctico")
-        ttk.Label(self.tab_sintactico,
-                  text="Pendiente: Carlos conecta parser.analizar_sintactico() aquí.",
-                  foreground='gray').pack(padx=10, pady=10)
+        self.tabs.add(self.tab_sintactico, text="Sintáctico")
+        self._build_tab_sintactico()
 
         # Pestaña Semántico — TODO Benjamin
         self.tab_semantico = ttk.Frame(self.tabs)
@@ -169,6 +167,15 @@ class DartAnalyzerApp(tk.Tk):
                                               foreground='#B00020',
                                               background='#FCEBEB')
         self.texto_errores_lexicos.pack(fill=tk.X, padx=4, pady=(0, 4))
+
+    def _build_tab_sintactico(self):
+        ttk.Label(self.tab_sintactico, text="Resultado del análisis sintáctico").pack(
+            anchor=tk.W, padx=4, pady=(4, 0))
+        self.texto_sintactico = tk.Text(self.tab_sintactico, wrap='word',
+                                         font=('Consolas', 10))
+        self.texto_sintactico.pack(fill=tk.BOTH, expand=True, padx=4, pady=4)
+        self.texto_sintactico.tag_configure('OK', foreground='#1D9E75')
+        self.texto_sintactico.tag_configure('ERR', foreground='#B00020')
 
     def _build_statusbar(self):
         self.status = tk.StringVar(value="Listo.")
@@ -224,9 +231,25 @@ class DartAnalyzerApp(tk.Tk):
         )
 
     def accion_sintactico(self):
-        # TODO Carlos: llamar analizar_sintactico(codigo, 'GUI-caluloper')
-        # y volcar errores_sintacticos en self.tab_sintactico
-        messagebox.showinfo("Pendiente", "Carlos implementará este análisis.")
+        codigo = self.editor.get('1.0', tk.END)
+        analizar_sintactico(codigo, 'GUI-caluloper')
+
+        self.texto_sintactico.delete('1.0', tk.END)
+        if errores_sintacticos:
+            self.texto_sintactico.insert(
+                '1.0',
+                f"Errores sintácticos ({len(errores_sintacticos)}):\n\n"
+                + '\n'.join(errores_sintacticos),
+                'ERR',
+            )
+        else:
+            self.texto_sintactico.insert(
+                '1.0', 'Análisis sintáctico completado sin errores.', 'OK')
+
+        self.tabs.select(self.tab_sintactico)
+        self.status.set(
+            f"Sintáctico: {len(errores_sintacticos)} error(es). Log guardado en /logs."
+        )
 
     def accion_semantico(self):
         # TODO Benjamin: llamar analizar_semantico(codigo, 'GUI-ibcg04')

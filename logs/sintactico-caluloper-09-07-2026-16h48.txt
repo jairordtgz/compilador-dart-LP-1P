@@ -1,0 +1,15 @@
+============================================================
+ANALISIS SINTACTICO DART
+Usuario: caluloper
+Fecha: 09/07/2026 16:48:39
+============================================================
+
+ERRORES SINTACTICOS
+------------------------------------------------------------
+Error sintáctico en línea 36: token inesperado 'for'
+Error sintáctico en línea 45: token inesperado '}'
+Error sintáctico en línea 55: token inesperado 'for'
+Error sintáctico en línea 55: token inesperado '<'
+Error sintáctico en línea 55: token inesperado ')'
+Error sintáctico en línea 57: token inesperado '}'
+Error sintáctico en línea 64: token inesperado '}'

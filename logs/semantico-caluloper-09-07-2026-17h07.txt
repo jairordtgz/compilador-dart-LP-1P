@@ -1,0 +1,12 @@
+============================================================
+ANALISIS SEMANTICO DART
+Usuario: caluloper
+Fecha: 09/07/2026 17:07:10
+============================================================
+
+ERRORES SEMANTICOS
+------------------------------------------------------------
+Error semántico [Identificador, Línea 11]: La variable 'veces' no ha sido declarada en el alcance actual.
+Error semántico [Identificador, Línea 37]: La variable 'nombre' no ha sido declarada en el alcance actual.
+Error semántico [Identificador, Línea 38]: La variable 'nombre' no ha sido declarada en el alcance actual.
+Error semántico [Identificador, Línea 40]: La variable 'nombre' no ha sido declarada en el alcance actual.
