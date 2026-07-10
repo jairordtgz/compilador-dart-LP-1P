@@ -230,20 +230,24 @@ def p_funcion_int(p):
     '''
     sentencia : INT IDENTIFICADOR PAREN_IZQ parametros PAREN_DER LLAVE_IZQ RETURN expresion PUNTO_COMA LLAVE_DER
               | INT IDENTIFICADOR PAREN_IZQ PAREN_DER LLAVE_IZQ RETURN expresion PUNTO_COMA LLAVE_DER
+              | INT IDENTIFICADOR PAREN_IZQ parametros PAREN_DER LLAVE_IZQ sentencias RETURN expresion PUNTO_COMA LLAVE_DER
+              | INT IDENTIFICADOR PAREN_IZQ PAREN_DER LLAVE_IZQ sentencias RETURN expresion PUNTO_COMA LLAVE_DER
     '''
-    
+
     nombre_funcion = p[2]
-    expresion_retorno = p[8] if len(p) == 11 else p[7]
+    expresion_retorno = p[len(p) - 3]
     verificar_tipo_retorno(p, nombre_funcion, 'int', expresion_retorno, p.lineno(1))
 
 def p_funcion_double(p):
     '''
     sentencia : DOUBLE IDENTIFICADOR PAREN_IZQ parametros PAREN_DER LLAVE_IZQ RETURN expresion PUNTO_COMA LLAVE_DER
               | DOUBLE IDENTIFICADOR PAREN_IZQ PAREN_DER LLAVE_IZQ RETURN expresion PUNTO_COMA LLAVE_DER
+              | DOUBLE IDENTIFICADOR PAREN_IZQ parametros PAREN_DER LLAVE_IZQ sentencias RETURN expresion PUNTO_COMA LLAVE_DER
+              | DOUBLE IDENTIFICADOR PAREN_IZQ PAREN_DER LLAVE_IZQ sentencias RETURN expresion PUNTO_COMA LLAVE_DER
     '''
-    
+
     nombre_funcion = p[2]
-    expresion_retorno = p[8] if len(p) == 11 else p[7]
+    expresion_retorno = p[len(p) - 3]
     verificar_tipo_retorno(p, nombre_funcion, 'double', expresion_retorno, p.lineno(1))
     
 def p_parametros(p):
@@ -280,6 +284,7 @@ def p_argumentos(p):
 def p_if(p):
     '''
     sentencia : IF PAREN_IZQ condicion PAREN_DER LLAVE_IZQ sentencias LLAVE_DER
+              | IF PAREN_IZQ condicion PAREN_DER LLAVE_IZQ sentencias LLAVE_DER resto_if
     '''
 
 #inicio aporte carlos
@@ -325,17 +330,13 @@ def p_acceder_indice_lista(p):
     '''
     p[0] = ('desconocido', None)
 
-# --- Eestructuras de control: else / else if, while ---
+# --- Eestructuras de control: else / else if (cadena de largo arbitrario), while ---
 
-def p_if_else(p):
+def p_resto_if(p):
     '''
-    sentencia : IF PAREN_IZQ condicion PAREN_DER LLAVE_IZQ sentencias LLAVE_DER ELSE LLAVE_IZQ sentencias LLAVE_DER
-    '''
-
-def p_if_elseif(p):
-    '''
-    sentencia : IF PAREN_IZQ condicion PAREN_DER LLAVE_IZQ sentencias LLAVE_DER ELSE IF PAREN_IZQ condicion PAREN_DER LLAVE_IZQ sentencias LLAVE_DER
-              | IF PAREN_IZQ condicion PAREN_DER LLAVE_IZQ sentencias LLAVE_DER ELSE IF PAREN_IZQ condicion PAREN_DER LLAVE_IZQ sentencias LLAVE_DER ELSE LLAVE_IZQ sentencias LLAVE_DER
+    resto_if : ELSE IF PAREN_IZQ condicion PAREN_DER LLAVE_IZQ sentencias LLAVE_DER
+             | ELSE IF PAREN_IZQ condicion PAREN_DER LLAVE_IZQ sentencias LLAVE_DER resto_if
+             | ELSE LLAVE_IZQ sentencias LLAVE_DER
     '''
 
 def p_while(p):
