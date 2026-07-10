@@ -318,6 +318,12 @@ def p_acceder_clave_mapa(p):
     '''
     expresion : IDENTIFICADOR CORCHETE_IZQ CADENA CORCHETE_DER
     '''
+    
+def p_acceder_indice_lista(p):
+    '''
+    expresion : IDENTIFICADOR CORCHETE_IZQ expresion CORCHETE_DER
+    '''
+    p[0] = ('desconocido', None)
 
 # --- Eestructuras de control: else / else if, while ---
 
@@ -532,16 +538,18 @@ def p_import(p):
     '''
     sentencia : IMPORT CADENA PUNTO_COMA
     '''
-
+  
 def p_leer_teclado(p):
     '''
     sentencia : STRING_TYPE INTERROGACION IDENTIFICADOR ASIGNACION IDENTIFICADOR PUNTO IDENTIFICADOR PAREN_IZQ PAREN_DER PUNTO_COMA
     '''
+    registrar_variable(p, p[3], 'String', constante=False,
+                        valor=None, linea=p.lineno(3))
 
 # FIN APORTE — Benjamin Cedeño
 
 
-parser = yacc.yacc()
+
 
 def analizar_sintactico(codigo, usuario):
 
@@ -626,13 +634,23 @@ def p_for(p):
     profundidad_bucle -= 1
 
 # --- For-in con marca de bucle ---
+def p_encabezado_for_in(p):
+    '''
+    encabezado_for_in : FOR PAREN_IZQ VAR IDENTIFICADOR IN IDENTIFICADOR PAREN_DER
+    '''
+    # Se reduce ANTES de entrar al cuerpo del for-in, por eso aqui si
+    # es seguro registrar la variable de iteracion (evita falsos R1
+    # cuando el cuerpo del bucle usa esa variable, ej: print(n)).
+    registrar_variable(p, p[4], 'desconocido', constante=False,
+                        valor=None, linea=p.lineno(4))
+
 def p_for_in(p):
     '''
-    sentencia : FOR PAREN_IZQ VAR IDENTIFICADOR IN IDENTIFICADOR PAREN_DER LLAVE_IZQ marca_bucle sentencias LLAVE_DER
+    sentencia : encabezado_for_in LLAVE_IZQ marca_bucle sentencias LLAVE_DER
     '''
     global profundidad_bucle
     profundidad_bucle -= 1
-
+    
 # --- Regla 6: break fuera de bucle ---
 def p_break(p):
     '''
@@ -670,3 +688,5 @@ def verificar_operacion(p, operador, izquierda, derecha):
             f"tipos '{tipo_izq}' y '{tipo_der}'."
         )
     return 'desconocido'
+
+parser = yacc.yacc()
