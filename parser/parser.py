@@ -569,6 +569,11 @@ def p_parametro_opcional(p):
                        | DOUBLE IDENTIFICADOR ASIGNACION FLOTANTE
                        | STRING_TYPE IDENTIFICADOR ASIGNACION CADENA
     '''
+    tipo_token = p.slice[1].type
+    nombre = p[2]
+    tipo   = TOKEN_A_TIPO[tipo_token]
+    registrar_variable(p, nombre, tipo, constante=False,
+                        valor=None, linea=p.lineno(2))
 
 def p_funcion_parametro_opcional(p):
     '''

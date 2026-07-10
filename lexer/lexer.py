@@ -200,7 +200,7 @@ def generar_log(tokens_encontrados, errores, desarrollador, algoritmo):
             f.write('ERRORES: Ninguno\n')
         f.write('\n' + sep + '\n')
 
-    print(f'\n[Log generado] → logs/{nombre_log}')
+    print(f'\n[Log generado] -> logs/{nombre_log}')
     return ruta
 
 
