@@ -26,7 +26,7 @@ pip install ply
 ### Interfaz gráfica (recomendado)
 
 ```bash
-python gui/main.py
+python gui/interfaz_grafica.py
 ```
 
 ### Por consola (análisis individual)
