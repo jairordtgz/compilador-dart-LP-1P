@@ -131,7 +131,7 @@ class DartAnalyzerApp(tk.Tk):
         self.tabs.add(self.tab_sintactico, text="Sintáctico")
         self._build_tab_sintactico()
 
-        # Pestaña Semántico — TODO Benjamin
+        # Pestaña Semántico
         self.tab_semantico = ttk.Frame(self.tabs)
         self.tabs.add(self.tab_semantico, text="Semántico")
         ttk.Label(self.tab_semantico, text="Resultado del análisis semántico").pack(
@@ -142,7 +142,7 @@ class DartAnalyzerApp(tk.Tk):
         self.texto_semantico.tag_configure('OK', foreground='#1D9E75')
         self.texto_semantico.tag_configure('ERR', foreground='#B00020')
 
-        # Pestaña Errores — TODO Benjamin (consolidado de los 3 análisis)
+        # Pestaña Errores (consolidado de los 3 análisis)
         self.tab_errores = ttk.Frame(self.tabs)
         self.tabs.add(self.tab_errores, text="Errores")
         ttk.Label(self.tab_errores, text="Errores semánticos").pack(
@@ -287,6 +287,9 @@ class DartAnalyzerApp(tk.Tk):
         self._actualizar_lineas()
         self.tabla_tokens.delete(*self.tabla_tokens.get_children())
         self.texto_errores_lexicos.delete('1.0', tk.END)
+        self.texto_sintactico.delete('1.0', tk.END)
+        self.texto_semantico.delete('1.0', tk.END)
+        self.texto_errores.delete('1.0', tk.END)
         self.status.set("Editor limpiado.")
 
     def accion_exportar(self):
