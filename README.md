@@ -23,13 +23,13 @@ pip install ply
 
 ## Cómo ejecutar
 
-### Interfaz gráfica (recomendado)
+### Interfaz gráfica
 
 ```bash
 python gui/interfaz_grafica.py
 ```
 
-### Por consola (análisis individual)
+### Análisis individual
 
 ```bash
 cd lexer
